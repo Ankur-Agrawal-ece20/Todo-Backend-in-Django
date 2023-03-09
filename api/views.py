@@ -61,7 +61,7 @@ def new1(request):
     a.save()
     serialized=ArticleSerializer(a)
 
-    #  JSONRwenderer converts the serizlized dta (dictionary) into json format
+    #  JSONRwenderer converts the serialized dta (dictionary) into json format
     y= JSONRenderer().render(serialized.data)
     # y is now a json 
 
@@ -83,6 +83,7 @@ def new1(request):
 
 
 '''using simple request.method way to create apis'''
+'''in header JsonResponse will set Content-Type: application/json on the other hand HttpResponse will set Content-Type: text/html; charset=utf-8'''
 # @csrf_exempt
 # def article_list(request):
     
@@ -106,13 +107,14 @@ def new1(request):
 
 
 
+
 # @csrf_exempt
 # def article_details(request,id=None):
 #     try:
 #         article=Article.objects.get(pk=id)
     
 #     except Article.DoesNotExist:
-#         return HttpResponse(status=404)
+#         return HttpResponse("article not found",status=404)
     
 #     if request.method == 'GET':
 #         serializer=ArticleSerializer(article)
@@ -149,6 +151,7 @@ def new1(request):
 #     elif request.method == 'POST':
 #         print("Request=",request)
 #         # data=JSONParser().parse(request)
+#         # no need of parsing
 #         serializer=ArticleSerializer(data=request.data)
 
 #         if serializer.is_valid():
@@ -163,7 +166,7 @@ def new1(request):
 #         article=Article.objects.get(pk=id)
     
 #     except Article.DoesNotExist:
-#         return Response(status=status.HTTP_404_NOT_FOUND)
+#         return Response("Response not found",status=status.HTTP_404_NOT_FOUND)
     
 #     if request.method == 'GET':
 #         serializer=ArticleSerializer(article)
@@ -212,7 +215,7 @@ def new1(request):
 #     def get(self,request,id):
 #         article=self.get_object(id)    
 #         if article is None:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
+#             return Response("Not found",status=status.HTTP_404_NOT_FOUND)
 #         serializer=ArticleSerializer(article)
 #         return Response(serializer.data,status=status.HTTP_200_OK)
 
@@ -230,14 +233,17 @@ def new1(request):
 #     def delete(self,request,id):
 #         article=self.get_object(id)
 #         if article is None:
-#             return Response(status=status.HTTP_404_NOT_FOUND)
+#             return Response("Article already deleted",status=status.HTTP_404_NOT_FOUND)
 #         article.delete()
-#         return Response("Deletion done")
+#         return Response("Deletion done",status=status.HTTP_204_NO_CONTENT)
 
 
-
+'''SWAGGER'''
 '''using mixins(generics) for api writing'''
 
+''' ListModelMixin - for getting articles
+    CreateModelMixin - for posting(creating) new articles
+'''
 # class ArticleList(generics.GenericAPIView,mixins.ListModelMixin,mixins.CreateModelMixin):
 #     queryset=Article.objects.all()
 #     serializer_class=ArticleSerializer
@@ -248,7 +254,10 @@ def new1(request):
 #     def post(self,request):
 #         return self.create(request)
 
-
+''' RetrieveModelMixin - for getting article of particular id
+    UpdateModelMixin - for put request on a article of particluar id
+    DestroyModelMixin - for deleting article of particular id
+'''
 '''method 1'''
 # class ArticleDetails(generics.GenericAPIView,mixins.RetrieveModelMixin,mixins.UpdateModelMixin,mixins.DestroyModelMixin):
 #     queryset=Article.objects.all()
@@ -281,9 +290,15 @@ def new1(request):
 #     def delete(self,request,id):
 #         return self.destroy(request,pk=id)
 
+'''viewsets'''
+'''3 ways
+    -ViewSet
+    -GenericViewSet
+    -ModelViewSet
+'''
 
 '''viewsets.Viewset method'''
-
+'''has list,create method instead of get,post , retrieve method for getting a particular id,update method  for putting a particular id, destroy method for deleting a particular id'''
 # class ArticleViewSet(viewsets.ViewSet):
 
 #     def list(self,request):
@@ -304,6 +319,8 @@ def new1(request):
 #         #     article=Article.objects.get(pk=pk)
 #         # except Article.DoesNotExist:
 #         #     return Response(status=status.HTTP_404_NOT_FOUND)
+#         # serializer=ArticleSerializer(article)
+#         # return Response(serializer.data,status=status.HTTP_200_OK)
 
 #         '''m2'''
 #         queryset=Article.objects.all()
@@ -314,6 +331,7 @@ def new1(request):
 
 
 '''viewsets.GenericViewSet'''
+
 # class ArticleViewSet(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateModelMixin,mixins.RetrieveModelMixin,mixins.DestroyModelMixin,mixins.UpdateModelMixin):
 #     queryset=Article.objects.all()
 #     serializer_class=ArticleSerializer
@@ -322,8 +340,8 @@ def new1(request):
 class ArticleViewSet(viewsets.ModelViewSet):
     queryset=Article.objects.all()
     serializer_class=ArticleSerializer
-    permission_classes=[IsAuthenticated]
-    authentication_classes=(TokenAuthentication,)
+#     # permission_classes=[IsAuthenticated]
+#     # authentication_classes=(TokenAuthentication,)
 
 
 
